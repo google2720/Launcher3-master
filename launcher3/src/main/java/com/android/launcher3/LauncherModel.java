@@ -1080,7 +1080,7 @@ public class LauncherModel extends BroadcastReceiver
     /**
      * Removes the specified items from the database
      * @param context
-     * @param item
+     * @param items
      */
     static void deleteItemsFromDatabase(Context context, final ArrayList<? extends ItemInfo> items) {
         final ContentResolver cr = context.getContentResolver();
@@ -2569,6 +2569,7 @@ public class LauncherModel extends BroadcastReceiver
          * Binds all loaded data to actual views on the main thread.
          */
         private void bindWorkspace(int synchronizeBindPage) {
+            Log.d("yunovo_launcher","LauncherModel -> bindWorkspace : "+synchronizeBindPage);
             final long t = SystemClock.uptimeMillis();
             Runnable r;
 
@@ -2597,6 +2598,10 @@ public class LauncherModel extends BroadcastReceiver
 
                 folders = sBgFolders.clone();
                 itemsIdMap = sBgItemsIdMap.clone();
+
+                Log.d("yunovo_launcher","LauncherModel -> bindWorkspace : "+workspaceItems.toString());
+                Log.d("yunovo_launcher","LauncherModel -> bindWorkspace : "+appWidgets.toString());
+                Log.d("yunovo_launcher","LauncherModel -> bindWorkspace : "+orderedScreenIds.toString());
             }
 
             final boolean isLoadingSynchronously =

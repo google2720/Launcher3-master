@@ -84,9 +84,12 @@ public class LauncherProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         final Context context = getContext();
+        Log.d("yunovo_launcher","LauncherProvider -> onCreate : ");
+        //启动严苛模式和创建数据库
         StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
         mOpenHelper = new DatabaseHelper(context);
         StrictMode.setThreadPolicy(oldPolicy);
+        //将ContentProvider放置到整个Launcher的管理类LauncherAppState中，以方便获取
         LauncherAppState.setLauncherProvider(this);
         return true;
     }

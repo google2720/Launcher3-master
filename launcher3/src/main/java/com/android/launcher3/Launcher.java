@@ -495,6 +495,7 @@ public class Launcher extends Activity
             } else {
                 // We only load the page synchronously if the user rotates (or triggers a
                 // configuration change) while launcher is in the foreground
+                Log.d("yunovo_launcher","Launcher -> startLoader : "+mWorkspace.getRestorePage());
                 mModel.startLoader(mWorkspace.getRestorePage());
             }
         }
@@ -621,7 +622,7 @@ public class Launcher extends Activity
         if (mLauncherCallbacks != null) {
             return mLauncherCallbacks.hasCustomContentToLeft();
         }
-        return false;
+        return true;
     }
 
     /**
@@ -3726,6 +3727,7 @@ public class Launcher extends Activity
         // Create the custom content page (this call updates mDefaultScreen which calls
         // setCurrentPage() so ensure that all pages are added before calling this).
         if (hasCustomContentToLeft()) {
+            Log.d("yunovo_launcher","Launcher-> hasCustomContentToLeft : ");
             mWorkspace.createCustomContentContainer();
             populateCustomContentContainer();
         }

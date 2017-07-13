@@ -581,13 +581,21 @@ public class Workspace extends PagedView
                 mLauncher.getLayoutInflater().inflate(R.layout.workspace_screen, this, false);
         customScreen.disableDragTarget();
 
+
         mWorkspaceScreens.put(CUSTOM_CONTENT_SCREEN_ID, customScreen);
         mScreenOrder.add(0, CUSTOM_CONTENT_SCREEN_ID);
 
         // We want no padding on the custom content
         customScreen.setPadding(0, 0, 0, 0);
 
+        TextView textView = new TextView(mLauncher);
+        textView.setText("哈哈哈哈哈哈哈");
+        customScreen.addView(textView );
+
         addFullScreenPage(customScreen);
+
+
+
 
         // Ensure that the current page and default page are maintained.
         mDefaultPage = mOriginalDefaultPage + 1;
