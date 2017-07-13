@@ -366,7 +366,7 @@ public class LauncherProvider extends ContentProvider {
 
         if (sp.getBoolean(EMPTY_DATABASE_CREATED, false)) {
             Log.d(TAG, "loading default workspace");
-
+           // 初始化AutoInstallsLayout
             AutoInstallsLayout loader = createWorkspaceLoaderFromAppRestriction();
             if (loader == null) {
                 loader = AutoInstallsLayout.get(getContext(),
@@ -1049,6 +1049,7 @@ public class LauncherProvider extends ContentProvider {
         @Thunk int loadFavorites(SQLiteDatabase db, AutoInstallsLayout loader) {
             ArrayList<Long> screenIds = new ArrayList<Long>();
             // TODO: Use multiple loaders with fall-back and transaction.
+            //调用AutoInstallsLayout中的loadLayout方法来解析配置的xml文件
             int count = loader.loadLayout(db, screenIds);
 
             // Add the screens specified by the items above

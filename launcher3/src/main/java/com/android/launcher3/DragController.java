@@ -237,6 +237,7 @@ public class DragController {
         mDragging = true;
         mIsAccessibleDrag = accessible;
 
+        //mDragObject = new DropTarget.DragObject()创建DragObject对象
         mDragObject = new DropTarget.DragObject();
 
         mDragObject.dragComplete = false;

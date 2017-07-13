@@ -21,6 +21,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.os.Build;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -94,8 +95,29 @@ public class InvariantDeviceProfile {
                 p.defaultLayoutId);
     }
 
+    @Override
+    public String toString() {
+        return "InvariantDeviceProfile{" +
+                "name='" + name + '\'' +
+                ", minWidthDps=" + minWidthDps +
+                ", minHeightDps=" + minHeightDps +
+                ", numRows=" + numRows +
+                ", numColumns=" + numColumns +
+                ", minAllAppsPredictionColumns=" + minAllAppsPredictionColumns +
+                ", numFolderRows=" + numFolderRows +
+                ", numFolderColumns=" + numFolderColumns +
+                ", iconSize=" + iconSize +
+                ", iconBitmapSize=" + iconBitmapSize +
+                ", fillResIconDpi=" + fillResIconDpi +
+                ", iconTextSize=" + iconTextSize +
+                ", numHotseatIcons=" + numHotseatIcons +
+                ", hotseatIconSize=" + hotseatIconSize +
+                ", defaultLayoutId=" + defaultLayoutId +
+                '}';
+    }
+
     InvariantDeviceProfile(String n, float w, float h, int r, int c, int fr, int fc, int maapc,
-            float is, float its, float hs, float his, int dlId) {
+                           float is, float its, float hs, float his, int dlId) {
         // Ensure that we have an odd number of hotseat items (since we need to place all apps)
         if (hs % 2 == 0) {
             throw new RuntimeException("All Device Profiles must have an odd number of hotseat spaces");
@@ -118,8 +140,10 @@ public class InvariantDeviceProfile {
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     InvariantDeviceProfile(Context context) {
+        //屏幕显示器对像参数
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
+        //通过DisplayMetrics多包含的信息，获取屏幕的宽和高
         DisplayMetrics dm = new DisplayMetrics();
         display.getMetrics(dm);
 
@@ -128,15 +152,23 @@ public class InvariantDeviceProfile {
         display.getCurrentSizeRange(smallestSize, largestSize);
 
         // This guarantees that width < height
+        //获取最小的宽高
         minWidthDps = Utilities.dpiFromPx(Math.min(smallestSize.x, smallestSize.y), dm);
         minHeightDps = Utilities.dpiFromPx(Math.min(largestSize.x, largestSize.y), dm);
+        //Log.d("yunovo_launcher","InvariantDeviceProfile-> minWidthDps :"+minWidthDps +" minHeightDps:"+minHeightDps);
 
+        //通过最小宽高和预定义的配置文件获取一个最接近的配置文件列表
         ArrayList<InvariantDeviceProfile> closestProfiles =
                 findClosestDeviceProfiles(minWidthDps, minHeightDps, getPredefinedDeviceProfiles());
+
+        //获取一个差值计算过的配置文件，用于配置图标及图标字体的大小
         InvariantDeviceProfile interpolatedDeviceProfileOut =
                 invDistWeightedInterpolate(minWidthDps,  minHeightDps, closestProfiles);
 
+        //最终的配置
         InvariantDeviceProfile closestProfile = closestProfiles.get(0);
+        //Log.d("yunovo_launcher","InvariantDeviceProfile-> closestProfile :"+closestProfile.toString());
+
         numRows = closestProfile.numRows;
         numColumns = closestProfile.numColumns;
         numHotseatIcons = closestProfile.numHotseatIcons;
@@ -151,6 +183,20 @@ public class InvariantDeviceProfile {
         iconTextSize = interpolatedDeviceProfileOut.iconTextSize;
         hotseatIconSize = interpolatedDeviceProfileOut.hotseatIconSize;
         fillResIconDpi = getLauncherIconDensity(iconBitmapSize);
+        Log.d("yunovo_launcher","InvariantDeviceProfile-> numRows :"+numRows);
+        Log.d("yunovo_launcher","InvariantDeviceProfile-> numColumns :"+numColumns);
+        Log.d("yunovo_launcher","InvariantDeviceProfile-> numHotseatIcons :"+numHotseatIcons);
+        Log.d("yunovo_launcher","InvariantDeviceProfile-> hotseatAllAppsRank :"+hotseatAllAppsRank);
+        Log.d("yunovo_launcher","InvariantDeviceProfile-> numFolderRows :"+numFolderRows);
+        Log.d("yunovo_launcher","InvariantDeviceProfile-> numFolderColumns :"+numFolderColumns);
+        Log.d("yunovo_launcher","InvariantDeviceProfile-> minAllAppsPredictionColumns :"+minAllAppsPredictionColumns);
+        Log.d("yunovo_launcher","InvariantDeviceProfile-> iconSize :"+iconSize);
+        Log.d("yunovo_launcher","InvariantDeviceProfile-> iconBitmapSize :"+iconBitmapSize);
+        Log.d("yunovo_launcher","InvariantDeviceProfile-> iconTextSize :"+iconTextSize);
+        Log.d("yunovo_launcher","InvariantDeviceProfile-> hotseatIconSize :"+hotseatIconSize);
+        Log.d("yunovo_launcher","InvariantDeviceProfile-> fillResIconDpi :"+fillResIconDpi);
+
+
 
         // If the partner customization apk contains any grid overrides, apply them
         // Supported overrides: numRows, numColumns, iconSize
@@ -193,9 +239,12 @@ public class InvariantDeviceProfile {
         // also includes the nav bar on the side
         predefinedDeviceProfiles.add(new InvariantDeviceProfile("Nexus 7",
                 575, 904,     5, 6, 4, 5, 4, 72, 14.4f,  7, 60, R.xml.default_workspace_5x6));
+
         // Larger tablet profiles always have system bars on the top & bottom
-        predefinedDeviceProfiles.add(new InvariantDeviceProfile("Nexus 10",
-                727, 1207,    5, 6, 4, 5, 4, 76, 14.4f,  7, 64, R.xml.default_workspace_5x6));
+        predefinedDeviceProfiles.add(new InvariantDeviceProfile(
+//name       minWidthDps minHeightDps numRows  numColumns numFolderRows numFolderColumns minAllAppsPredictionColumns iconSize  iconTextSize numHotseatIcons hotseatIconSize  defaultLayoutId
+"Nexus 10",  727,        1207,         5,       6,        4,             5,              4,                           76,      14.4f,       7,               64,             R.xml.default_workspace_5x6));
+
         predefinedDeviceProfiles.add(new InvariantDeviceProfile("20-inch Tablet",
                 1527, 2527,   7, 7, 6, 6, 4, 100, 20,  7, 72, R.xml.default_workspace_4x4));
         return predefinedDeviceProfiles;
@@ -237,6 +286,7 @@ public class InvariantDeviceProfile {
         }
     }
 
+    //Math.hypot(x,y)   返回 sqrt(x*x + y*y)。
     @Thunk float dist(float x0, float y0, float x1, float y1) {
         return (float) Math.hypot(x1 - x0, y1 - y0);
     }
@@ -256,7 +306,6 @@ public class InvariantDeviceProfile {
                         - dist(width, height, b.minWidthDps, b.minHeightDps));
             }
         });
-
         return pointsByNearness;
     }
 

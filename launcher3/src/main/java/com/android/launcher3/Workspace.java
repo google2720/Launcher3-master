@@ -388,7 +388,9 @@ public class Workspace extends PagedView
 
         mIsDragOccuring = true;
         updateChildrenLayersEnabled(false);
+        //锁定屏幕
         mLauncher.lockScreenOrientation();
+        //判断是否添加新的空白屏
         mLauncher.onInteractionBegin();
         // Prevent any Un/InstallShortcutReceivers from updating the db while we are dragging
         InstallShortcutReceiver.enableInstallQueue();
@@ -2228,6 +2230,7 @@ public class Workspace extends PagedView
     }
 
     public void startDrag(CellLayout.CellInfo cellInfo) {
+        //对于你长按的图标进行了隐藏
         startDrag(cellInfo, false);
     }
 
@@ -2243,6 +2246,7 @@ public class Workspace extends PagedView
         mDragInfo = cellInfo;
         child.setVisibility(INVISIBLE);
         CellLayout layout = (CellLayout) child.getParent().getParent();
+        //对长按的那个View的位置进行储存，也就是他占用的位置，这个位置虽然图标隐藏了但是在它被放到其他地方前还是被它占用的
         layout.prepareChildForDrag(child);
 
         beginDragShared(child, this, accessible);
@@ -2258,17 +2262,23 @@ public class Workspace extends PagedView
         child.setPressed(false);
 
         // The outline is used to visualize where the item will land if dropped
+        // 通过createDragOutline方法生成mDragOutline
+        // 这是你要拖动的View的边框，当你拖动View时，这个边框会在你拖动的附近允许你防止该View的位置显示出来，以表示你可以将View放置的地方
         mDragOutline = createDragOutline(child, DRAG_BITMAP_PADDING);
 
         mLauncher.onDragStarted(child);
         // The drag bitmap follows the touch point around on the screen
         AtomicInteger padding = new AtomicInteger(DRAG_BITMAP_PADDING);
+
+        //调用createDragBitmap这个方法创建你上面隐藏的那个View的Bitmap
         final Bitmap b = createDragBitmap(child, padding);
 
         final int bmpWidth = b.getWidth();
         final int bmpHeight = b.getHeight();
 
         float scale = mLauncher.getDragLayer().getLocationInDragLayer(child, mTempXY);
+
+        // 开始计算拖拽位置
         int dragLayerX = Math.round(mTempXY[0] - (bmpWidth - scale * child.getWidth()) / 2);
         int dragLayerY = Math.round(mTempXY[1] - (bmpHeight - scale * bmpHeight) / 2
                         - padding.get() / 2);
@@ -2277,6 +2287,7 @@ public class Workspace extends PagedView
         Point dragVisualizeOffset = null;
         Rect dragRect = null;
         if (child instanceof BubbleTextView) {
+            //这里主要是计算拖拽的起始位置
             BubbleTextView icon = (BubbleTextView) child;
             int iconSize = grid.iconSizePx;
             int top = child.getPaddingTop();
@@ -2323,6 +2334,7 @@ public class Workspace extends PagedView
             mDragSourceInternal = (ShortcutAndWidgetContainer) child.getParent();
         }
 
+        //调用mDragController.startDrag方法开始拖拽
         DragView dv = mDragController.startDrag(b, dragLayerX, dragLayerY, source, child.getTag(),
                 DragController.DRAG_ACTION_MOVE, dragVisualizeOffset, dragRect, scale, accessible);
         dv.setIntrinsicIconScaleFactor(source.getIntrinsicIconScaleFactor());

@@ -20,7 +20,6 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.UserManager;
 import android.util.Log;
 
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
@@ -82,13 +81,16 @@ public class LauncherAppState {
         if (sContext.getResources().getBoolean(R.bool.debug_memory_enabled)) {
             MemoryTracker.startTrackingMe(sContext, "L");
         }
-
+        //初始化固定的设备配置
         mInvariantDeviceProfile = new InvariantDeviceProfile(sContext);
+        //初始化图标管理工具
         mIconCache = new IconCache(sContext, mInvariantDeviceProfile);
+        //初始化Widget加载混存工具
         mWidgetCache = new WidgetPreviewLoader(sContext, mIconCache);
 
         mAppFilter = AppFilter.loadByName(sContext.getString(R.string.app_filter_class));
         mBuildInfo = BuildInfo.loadByName(sContext.getString(R.string.build_info_class));
+        //初始化广播
         mModel = new LauncherModel(this, mIconCache, mAppFilter);
 
         LauncherAppsCompat.getInstance(sContext).addOnAppsChangedCallback(mModel);
@@ -100,7 +102,7 @@ public class LauncherAppState {
         // For handling managed profiles
         filter.addAction(LauncherAppsCompat.ACTION_MANAGED_PROFILE_ADDED);
         filter.addAction(LauncherAppsCompat.ACTION_MANAGED_PROFILE_REMOVED);
-
+        //注册广播
         sContext.registerReceiver(mModel, filter);
         UserManagerCompat.getInstance(sContext).enableAndResetCache();
     }
@@ -177,4 +179,5 @@ public class LauncherAppState {
     public static boolean isDogfoodBuild() {
         return getInstance().mBuildInfo.isDogfoodBuild();
     }
+
 }

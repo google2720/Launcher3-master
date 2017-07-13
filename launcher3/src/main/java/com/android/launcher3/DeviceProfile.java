@@ -378,6 +378,10 @@ public class DeviceProfile {
         return visibleChildren;
     }
 
+    /**
+     * 动态设置桌面各个控件的位置及宽高等属性
+     * @param launcher
+     */
     public void layout(Launcher launcher) {
         FrameLayout.LayoutParams lp;
         boolean hasVerticalBarLayout = isVerticalBarLayout();

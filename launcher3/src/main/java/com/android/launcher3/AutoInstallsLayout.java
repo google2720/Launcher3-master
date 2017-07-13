@@ -214,6 +214,7 @@ public class AutoInstallsLayout {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
+            //parseAndAddNode 对小部件，图标，文件夹等分类进行分辨解析，解析过程中如果有include标签，则对相应的xml文件进行解析,解析过程中将解析的各种信息存储到数据库中，以方便后面使用
             count += parseAndAddNode(parser, tagParserMap, screenIds);
         }
         return count;

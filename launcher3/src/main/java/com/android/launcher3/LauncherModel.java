@@ -1448,6 +1448,7 @@ public class LauncherModel extends BroadcastReceiver
                 Log.d(TAG, "loadAndBindWorkspace mWorkspaceLoaded=" + mWorkspaceLoaded);
             }
 
+            //判断workspace是否已经加载
             if (!mWorkspaceLoaded) {
                 loadWorkspace();
                 synchronized (LoaderTask.this) {
@@ -1720,6 +1721,7 @@ public class LauncherModel extends BroadcastReceiver
         private void loadWorkspace() {
             final long t = DEBUG_LOADERS ? SystemClock.uptimeMillis() : 0;
 
+            //初始化一些值
             final Context context = mContext;
             final ContentResolver contentResolver = context.getContentResolver();
             final PackageManager manager = context.getPackageManager();
@@ -1764,10 +1766,12 @@ public class LauncherModel extends BroadcastReceiver
             } else {
                 // Make sure the default workspace is loaded
                 Launcher.addDumpLog(TAG, "loadWorkspace: loading default favorites", false);
+                // 调用loadDefaultFavoritesIfNecessary这个方法，来解析配置默认的桌面图标的xml文件
                 LauncherAppState.getLauncherProvider().loadDefaultFavoritesIfNecessary();
             }
 
             synchronized (sBgLock) {
+                //初始化一些值
                 clearSBgDataStructures();
                 final HashMap<String, Integer> installingPkgs = PackageInstallerCompat
                         .getInstance(mContext).updateAndGetActiveSessionCache();
@@ -1785,6 +1789,7 @@ public class LauncherModel extends BroadcastReceiver
                 final LongArrayMap<ItemInfo[][]> occupied = new LongArrayMap<>();
 
                 try {
+                    //从数据库查询解析出来的所有应用信息
                     final int idIndex = c.getColumnIndexOrThrow(LauncherSettings.Favorites._ID);
                     final int intentIndex = c.getColumnIndexOrThrow
                             (LauncherSettings.Favorites.INTENT);
@@ -1858,6 +1863,7 @@ public class LauncherModel extends BroadcastReceiver
                                     intent = Intent.parseUri(intentDescription, 0);
                                     ComponentName cn = intent.getComponent();
                                     if (cn != null && cn.getPackageName() != null) {
+                                        //检测数据库(从xml文件解析出来存入数据库的)中取出来的app包是否存在
                                         boolean validPkg = launcherApps.isPackageEnabledForProfile(
                                                 cn.getPackageName(), user);
                                         boolean validComponent = validPkg &&
@@ -2639,11 +2645,15 @@ public class LauncherModel extends BroadcastReceiver
             };
             runOnMainThread(r);
 
+            //开始绑定
             bindWorkspaceScreens(oldCallbacks, orderedScreenIds);
 
             // Load items on the current page
+            // bind当前页面的图标、文件夹、widget的
             bindWorkspaceItems(oldCallbacks, currentWorkspaceItems, currentAppWidgets,
                     currentFolders, null);
+
+            //结束绑定
             if (isLoadingSynchronously) {
                 r = new Runnable() {
                     public void run() {
@@ -2661,6 +2671,7 @@ public class LauncherModel extends BroadcastReceiver
             synchronized (mDeferredBindRunnables) {
                 mDeferredBindRunnables.clear();
             }
+            //bind其他屏幕图标、文件夹、widget
             bindWorkspaceItems(oldCallbacks, otherWorkspaceItems, otherAppWidgets, otherFolders,
                     (isLoadingSynchronously ? mDeferredBindRunnables : null));
 
@@ -2866,6 +2877,7 @@ public class LauncherModel extends BroadcastReceiver
             // Cleanup any data stored for a deleted user.
             ManagedProfileHeuristic.processAllUsers(profiles, mContext);
 
+            //绑定小部件和快捷方式到小部件界面
             loadAndBindWidgetsAndShortcuts(tryGetCallbacks(oldCallbacks), true /* refresh */);
             if (DEBUG_LOADERS) {
                 Log.d(TAG, "Icons processed in "

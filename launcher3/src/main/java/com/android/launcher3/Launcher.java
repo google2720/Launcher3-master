@@ -431,10 +431,11 @@ public class Launcher extends Activity
 
         super.onCreate(savedInstanceState);
 
+        //初始化LauncherAppState
         LauncherAppState.setApplicationContext(getApplicationContext());
         LauncherAppState app = LauncherAppState.getInstance();
 
-        // Load configuration-specific DeviceProfile
+        //初始化手机固件信息对象DeviceProfile Load configuration-specific DeviceProfile
         mDeviceProfile = getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE ?
                         app.getInvariantDeviceProfile().landscapeProfile
@@ -446,12 +447,14 @@ public class Launcher extends Activity
         mModel = app.setLauncher(this);
         mIconCache = app.getIconCache();
 
+        //初始化拖拽管理器DragController
         mDragController = new DragController(this);
         mInflater = getLayoutInflater();
         mStateTransitionAnimation = new LauncherStateTransitionAnimation(this);
 
         mStats = new Stats(this);
 
+        //然后初始化小部件管理器
         mAppWidgetManager = AppWidgetManagerCompat.getInstance(this);
 
         mAppWidgetHost = new LauncherAppWidgetHost(this, APPWIDGET_HOST_ID);
@@ -467,9 +470,11 @@ public class Launcher extends Activity
                     Environment.getExternalStorageDirectory() + "/launcher");
         }
 
+        //加载布局
         setContentView(R.layout.launcher);
-
+        //初始化桌面各个控件
         setupViews();
+        //设置各个控件的位置
         mDeviceProfile.layout(this);
 
         lockAllApps();
@@ -481,6 +486,7 @@ public class Launcher extends Activity
             android.os.Debug.stopMethodTracing();
         }
 
+       // mModel.startLoader方法来加载应用数据
         if (!mRestoring) {
             if (DISABLE_SYNCHRONOUS_BINDING_CURRENT_PAGE) {
                 // If the user leaves launcher, then we should just load items asynchronously when
@@ -1513,12 +1519,16 @@ public class Launcher extends Activity
      * @return A View inflated from layoutResId.
      */
     public View createShortcut(ViewGroup parent, ShortcutInfo info) {
+
+
         BubbleTextView favorite = (BubbleTextView) mInflater.inflate(R.layout.app_icon,
                 parent, false);
         favorite.applyFromShortcutInfo(info, mIconCache);
         favorite.setCompoundDrawablePadding(mDeviceProfile.iconDrawablePaddingPx);
         favorite.setOnClickListener(this);
         favorite.setOnFocusChangeListener(mFocusHandler);
+
+
         return favorite;
     }
 
@@ -3168,10 +3178,13 @@ public class Launcher extends Activity
     }
 
     public boolean onLongClick(View v) {
+        // 如果不允许拖拽则返回
         if (!isDraggingEnabled()) return false;
+        // 如果桌面锁定返回
         if (isWorkspaceLocked()) return false;
+        // 如果没有在桌面显示状态返回
         if (mState != State.WORKSPACE) return false;
-
+        // 显示所有图标的按钮，显示所有图标界面
         if (v == mAllAppsButton) {
             onLongClickAllAppsButton(v);
             return true;
@@ -3180,6 +3193,8 @@ public class Launcher extends Activity
         if (v instanceof Workspace) {
             if (!mWorkspace.isInOverviewMode()) {
                 if (!mWorkspace.isTouchActive()) {
+                    // 长按的是桌面的空白区域，则调用showOverviewMode(true)来显示桌面预览状态
+                    // 也就是桌面缩小，显示多个CellLayout的状态，这时再长按单个CellLayout可以进行拖拽排序
                     showOverviewMode(true);
                     mWorkspace.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
                             HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
@@ -3195,8 +3210,11 @@ public class Launcher extends Activity
         CellLayout.CellInfo longClickCellInfo = null;
         View itemUnderLongClick = null;
         if (v.getTag() instanceof ItemInfo) {
+            // 当前长按的是app的图标或者文件夹，这时会创建一个CellLayout.CellInfo对象，
+            // 这个对象是对你要拖拽的View包含对象的信息存储也就相当于复制了一份
             ItemInfo info = (ItemInfo) v.getTag();
             longClickCellInfo = new CellLayout.CellInfo(v, info);
+            //itemUnderLongClick 正在长按的图标
             itemUnderLongClick = longClickCellInfo.cell;
             resetAddInfo();
         }
@@ -3204,9 +3222,12 @@ public class Launcher extends Activity
         // The hotseat touch handling does not go through Workspace, and we always allow long press
         // on hotseat items.
         final boolean inHotseat = isHotseatLayout(v);
+
         if (!mDragController.isDragging()) {
+            //如果没有拖拽事件执行就开始判断执行拖拽事件
             if (itemUnderLongClick == null) {
                 // User long pressed on empty space
+                //如果CellLayout.CellInfo这个对象为空，则执行桌面预览或者排序事件
                 mWorkspace.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
                         HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
                 if (mWorkspace.isInOverviewMode()) {
@@ -3215,12 +3236,15 @@ public class Launcher extends Activity
                     showOverviewMode(true);
                 }
             } else {
+                // 如果CellLayout.CellInfo这个对象不为空说明长按的是图标，那么此时要判断你拖动的不是文件夹或者不是显示所有图标的那个按钮，开始执行
+                // mWorkspace.startDrag(longClickCellInfo)方法
                 final boolean isAllAppsButton = inHotseat && isAllAppsButtonRank(
                         mHotseat.getOrderInHotseat(
                                 longClickCellInfo.cellX,
                                 longClickCellInfo.cellY));
                 if (!(itemUnderLongClick instanceof Folder || isAllAppsButton)) {
                     // User long pressed on an item
+                    // 长按拖拽 icon
                     mWorkspace.startDrag(longClickCellInfo);
                 }
             }

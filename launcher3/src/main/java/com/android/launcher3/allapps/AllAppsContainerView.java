@@ -144,6 +144,7 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
     @Thunk View mRevealView;
     @Thunk AllAppsRecyclerView mAppsRecyclerView;
     @Thunk AllAppsSearchBarController mSearchBarController;
+
     private ViewGroup mSearchBarContainerView;
     private View mSearchBarView;
     private SpannableStringBuilder mSearchQueryBuilder = null;
@@ -240,6 +241,7 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         View searchBarView = searchController.getView(mSearchBarContainerView);
         mSearchBarContainerView.addView(searchBarView);
         mSearchBarContainerView.setVisibility(View.VISIBLE);
+
         mSearchBarView = searchBarView;
         setHasSearchBar();
 
