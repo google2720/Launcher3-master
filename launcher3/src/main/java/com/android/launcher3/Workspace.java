@@ -556,6 +556,7 @@ public class Workspace extends PagedView
             throw new RuntimeException("Screen id " + screenId + " already exists!");
         }
 
+        Log.d("yunovo_launcher","Launcher-> insertNewWorkspaceScreen ");
         // Inflate the cell layout, but do not add it automatically so that we can get the newly
         // created CellLayout.
         CellLayout newScreen = (CellLayout) mLauncher.getLayoutInflater().inflate(
@@ -588,13 +589,8 @@ public class Workspace extends PagedView
         // We want no padding on the custom content
         customScreen.setPadding(0, 0, 0, 0);
 
-        TextView textView = new TextView(mLauncher);
-        textView.setText("哈哈哈哈哈哈哈");
-        customScreen.addView(textView );
 
         addFullScreenPage(customScreen);
-
-
 
 
         // Ensure that the current page and default page are maintained.

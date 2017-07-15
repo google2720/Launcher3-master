@@ -237,8 +237,11 @@ public class InvariantDeviceProfile {
                 406, 694,     5, 5, 4, 4, 4, 64, 14.4f,  5, 56, R.xml.default_workspace_5x5));
         // The tablet profile is odd in that the landscape orientation
         // also includes the nav bar on the side
-        predefinedDeviceProfiles.add(new InvariantDeviceProfile("Nexus 7",
-                575, 904,     5, 6, 4, 5, 4, 72, 14.4f,  7, 60, R.xml.default_workspace_5x6));
+        //
+        predefinedDeviceProfiles.add(new InvariantDeviceProfile(
+
+        //name   minWidthDps minHeightDps numRows  numColumns numFolderRows numFolderColumns minAllAppsPredictionColumns iconSize  iconTextSize numHotseatIcons hotseatIconSize  defaultLayoutId
+        "k101",     575,       904,        2,          4,       2,               2,              4,                         150,       20.4f,      3,                 150,          R.xml.default_workspace_2x2));
 
         // Larger tablet profiles always have system bars on the top & bottom
         predefinedDeviceProfiles.add(new InvariantDeviceProfile(

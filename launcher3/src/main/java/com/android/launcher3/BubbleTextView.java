@@ -159,6 +159,9 @@ public class BubbleTextView extends TextView
         }
 
         setAccessibilityDelegate(LauncherAppState.getInstance().getAccessibilityDelegate());
+
+        setTextColor(getContext().getResources().getColor(android.R.color.white));
+        setAlpha(1.0f);
     }
 
     public void applyFromShortcutInfo(ShortcutInfo info, IconCache iconCache) {
@@ -326,6 +329,8 @@ public class BubbleTextView extends TextView
         }
 
         updateIconState();
+
+
     }
 
     void clearPressedBackground() {

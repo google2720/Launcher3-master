@@ -389,6 +389,7 @@ public class Launcher extends Activity
     private boolean mRotationEnabled = false;
 
     @Thunk void setOrientation() {
+        Log.d("yunovo_launcher","Launcher -> setOrientation "+mRotationEnabled);
         if (mRotationEnabled) {
             unlockScreenOrientation(true);
         } else {
@@ -622,7 +623,7 @@ public class Launcher extends Activity
         if (mLauncherCallbacks != null) {
             return mLauncherCallbacks.hasCustomContentToLeft();
         }
-        return true;
+        return false;
     }
 
     /**
@@ -2386,7 +2387,13 @@ public class Launcher extends Activity
                 addAppWidgetImpl(appWidgetId, info, null, info.info);
             } else {
                 mPendingAddWidgetInfo = info.info;
+
+
                 Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+//                Intent i = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+//                String pkg = "com.android.settings";
+//                String cls = "com.android.settings.AllowBindAppWidgetActivity";
+//                i.setComponent(new ComponentName(pkg, cls));
                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.componentName);
                 mAppWidgetManager.getUser(mPendingAddWidgetInfo)
@@ -3736,6 +3743,7 @@ public class Launcher extends Activity
     @Override
     public void bindAddScreens(ArrayList<Long> orderedScreenIds) {
         int count = orderedScreenIds.size();
+        Log.d("yunovo_launcher","Launcher-> bindAddScreens count: "+count);
         for (int i = 0; i < count; i++) {
             mWorkspace.insertNewWorkspaceScreenBeforeEmptyScreen(orderedScreenIds.get(i));
         }
@@ -4567,15 +4575,17 @@ public class Launcher extends Activity
         // The two first run cling paths are mutually exclusive, if the launcher is preinstalled
         // on the device, then we always show the first run cling experience (or if there is no
         // launcher2). Otherwise, we prompt the user upon started for migration
-        LauncherClings launcherClings = new LauncherClings(this);
-        if (launcherClings.shouldShowFirstRunOrMigrationClings()) {
-            mClings = launcherClings;
-            if (mModel.canMigrateFromOldLauncherDb(this)) {
-                launcherClings.showMigrationCling();
-            } else {
-                launcherClings.showLongPressCling(true);
-            }
-        }
+
+        //edit by zjj 去掉引导页
+//        LauncherClings launcherClings = new LauncherClings(this);
+//        if (launcherClings.shouldShowFirstRunOrMigrationClings()) {
+//            mClings = launcherClings;
+//            if (mModel.canMigrateFromOldLauncherDb(this)) {
+//                launcherClings.showMigrationCling();
+//            } else {
+//                launcherClings.showLongPressCling(true);
+//            }
+//        }
     }
 
     void showWorkspaceSearchAndHotseat() {

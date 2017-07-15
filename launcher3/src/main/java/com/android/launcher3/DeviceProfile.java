@@ -25,6 +25,7 @@ import android.graphics.Paint.FontMetrics;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -418,7 +419,8 @@ public class DeviceProfile {
         lp.gravity = Gravity.CENTER;
         Rect padding = getWorkspacePadding(isLayoutRtl);
         workspace.setLayoutParams(lp);
-        workspace.setPadding(padding.left, padding.top, padding.right, padding.bottom);
+       // workspace.setPadding(padding.left, padding.top, padding.right, padding.bottom);
+        workspace.setPadding(20, 20, 20, 60);
         workspace.setPageSpacing(getWorkspacePageSpacing(isLayoutRtl));
 
         // Layout the hotseat
@@ -427,9 +429,13 @@ public class DeviceProfile {
         if (hasVerticalBarLayout) {
             // Vertical hotseat -- The hotseat is fixed in the layout to be on the right of the
             //                     screen regardless of RTL
+            Log.d("yunovo_launcher","DeviceProfile -> hotseat RIGHT");
             lp.gravity = Gravity.RIGHT;
             lp.width = hotseatBarHeightPx;
             lp.height = LayoutParams.MATCH_PARENT;
+            //edit by zjj hotseat
+            lp.width = 0;
+            lp.height = 0;
             hotseat.findViewById(R.id.layout).setPadding(0, 2 * edgeMarginPx, 0, 2 * edgeMarginPx);
         } else if (isTablet) {
             // Pad the hotseat with the workspace padding calculated above
@@ -440,6 +446,7 @@ public class DeviceProfile {
                     edgeMarginPx + padding.right,
                     2 * edgeMarginPx);
         } else {
+            Log.d("yunovo_launcher","DeviceProfile -> hotseat BOTTOM");
             // For phones, layout the hotseat without any bottom margin
             // to ensure that we have space for the folders
             lp.gravity = Gravity.BOTTOM;
@@ -453,10 +460,21 @@ public class DeviceProfile {
         // Layout the page indicators
         View pageIndicator = launcher.findViewById(R.id.page_indicator);
         if (pageIndicator != null) {
+
             if (hasVerticalBarLayout) {
+                Log.d("yunovo_launcher","DeviceProfile -> pageIndicator Hide the page indicators when we have vertical search/hotseat");
                 // Hide the page indicators when we have vertical search/hotseat
-                pageIndicator.setVisibility(View.GONE);
+               // pageIndicator.setVisibility(View.GONE);
+
+                pageIndicator.setVisibility(View.VISIBLE);
+                lp = (FrameLayout.LayoutParams) pageIndicator.getLayoutParams();
+                lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+                lp.width = LayoutParams.WRAP_CONTENT;
+                lp.height = LayoutParams.WRAP_CONTENT;
+                lp.bottomMargin = hotseatBarHeightPx;
+                pageIndicator.setLayoutParams(lp);
             } else {
+                Log.d("yunovo_launcher","DeviceProfile -> pageIndicator Put the page indicators above the hotseat");
                 // Put the page indicators above the hotseat
                 lp = (FrameLayout.LayoutParams) pageIndicator.getLayoutParams();
                 lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
@@ -465,6 +483,7 @@ public class DeviceProfile {
                 lp.bottomMargin = hotseatBarHeightPx;
                 pageIndicator.setLayoutParams(lp);
             }
+
         }
 
         // Layout the Overview Mode
