@@ -13,9 +13,14 @@ android {
     }
     buildTypes {
         release {
+            buildConfigField "boolean", "LOG_DEBUG", "false"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+        }
+
     }
 }
 
@@ -23,5 +28,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:23.1.0'
     compile 'com.android.support:recyclerview-v7:23.1.0'
+    compile 'com.github.zhaokaiqiang.klog:library:1.6.0'
     compile project(':wallpaperpick')
 }

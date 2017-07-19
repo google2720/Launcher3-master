@@ -160,6 +160,9 @@ public class BubbleTextView extends TextView
 
         setAccessibilityDelegate(LauncherAppState.getInstance().getAccessibilityDelegate());
 
+
+        setBackgroundResource(R.drawable.card_fm_n);
+        setPadding(40,40,40,40);
         setTextColor(getContext().getResources().getColor(android.R.color.white));
         setAlpha(1.0f);
     }

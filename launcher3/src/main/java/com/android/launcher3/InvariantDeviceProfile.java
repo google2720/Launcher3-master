@@ -21,11 +21,11 @@ import android.content.Context;
 import android.graphics.Point;
 import android.os.Build;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
 import com.android.launcher3.util.Thunk;
+import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,6 +45,7 @@ public class InvariantDeviceProfile {
 
     // used to offset float not being able to express extremely small weights in extreme cases.
     private static float WEIGHT_EFFICIENT = 100000f;
+
 
     // Profile-defining invariant properties
     String name;
@@ -183,18 +184,18 @@ public class InvariantDeviceProfile {
         iconTextSize = interpolatedDeviceProfileOut.iconTextSize;
         hotseatIconSize = interpolatedDeviceProfileOut.hotseatIconSize;
         fillResIconDpi = getLauncherIconDensity(iconBitmapSize);
-        Log.d("yunovo_launcher","InvariantDeviceProfile-> numRows :"+numRows);
-        Log.d("yunovo_launcher","InvariantDeviceProfile-> numColumns :"+numColumns);
-        Log.d("yunovo_launcher","InvariantDeviceProfile-> numHotseatIcons :"+numHotseatIcons);
-        Log.d("yunovo_launcher","InvariantDeviceProfile-> hotseatAllAppsRank :"+hotseatAllAppsRank);
-        Log.d("yunovo_launcher","InvariantDeviceProfile-> numFolderRows :"+numFolderRows);
-        Log.d("yunovo_launcher","InvariantDeviceProfile-> numFolderColumns :"+numFolderColumns);
-        Log.d("yunovo_launcher","InvariantDeviceProfile-> minAllAppsPredictionColumns :"+minAllAppsPredictionColumns);
-        Log.d("yunovo_launcher","InvariantDeviceProfile-> iconSize :"+iconSize);
-        Log.d("yunovo_launcher","InvariantDeviceProfile-> iconBitmapSize :"+iconBitmapSize);
-        Log.d("yunovo_launcher","InvariantDeviceProfile-> iconTextSize :"+iconTextSize);
-        Log.d("yunovo_launcher","InvariantDeviceProfile-> hotseatIconSize :"+hotseatIconSize);
-        Log.d("yunovo_launcher","InvariantDeviceProfile-> fillResIconDpi :"+fillResIconDpi);
+        KLog.d("yunovo_launcher","InvariantDeviceProfile-> numRows :"+numRows);
+        KLog.d("yunovo_launcher","InvariantDeviceProfile-> numColumns :"+numColumns);
+        KLog.d("yunovo_launcher","InvariantDeviceProfile-> numHotseatIcons :"+numHotseatIcons);
+        KLog.d("yunovo_launcher","InvariantDeviceProfile-> hotseatAllAppsRank :"+hotseatAllAppsRank);
+        KLog.d("yunovo_launcher","InvariantDeviceProfile-> numFolderRows :"+numFolderRows);
+        KLog.d("yunovo_launcher","InvariantDeviceProfile-> numFolderColumns :"+numFolderColumns);
+        KLog.d("yunovo_launcher","InvariantDeviceProfile-> minAllAppsPredictionColumns :"+minAllAppsPredictionColumns);
+        KLog.d("yunovo_launcher","InvariantDeviceProfile-> iconSize :"+iconSize);
+        KLog.d("yunovo_launcher","InvariantDeviceProfile-> iconBitmapSize :"+iconBitmapSize);
+        KLog.d("yunovo_launcher","InvariantDeviceProfile-> iconTextSize :"+iconTextSize);
+        KLog.d("yunovo_launcher","InvariantDeviceProfile-> hotseatIconSize :"+hotseatIconSize);
+        KLog.d("yunovo_launcher","InvariantDeviceProfile-> fillResIconDpi :"+fillResIconDpi);
 
 
 
@@ -241,7 +242,7 @@ public class InvariantDeviceProfile {
         predefinedDeviceProfiles.add(new InvariantDeviceProfile(
 
         //name   minWidthDps minHeightDps numRows  numColumns numFolderRows numFolderColumns minAllAppsPredictionColumns iconSize  iconTextSize numHotseatIcons hotseatIconSize  defaultLayoutId
-        "k101",     575,       904,        2,          4,       2,               2,              4,                         150,       20.4f,      3,                 150,          R.xml.default_workspace_2x2));
+        "k101",     575,       904,        2,          4,       2,               2,              4,                         120,       20.4f,      3,                 150,          R.xml.default_workspace_2x2));
 
         // Larger tablet profiles always have system bars on the top & bottom
         predefinedDeviceProfiles.add(new InvariantDeviceProfile(

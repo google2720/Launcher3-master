@@ -62,6 +62,7 @@ import com.android.launcher3.util.CursorIconInfo;
 import com.android.launcher3.util.LongArrayMap;
 import com.android.launcher3.util.ManagedProfileHeuristic;
 import com.android.launcher3.util.Thunk;
+import com.socks.library.KLog;
 
 import java.lang.ref.WeakReference;
 import java.net.URISyntaxException;
@@ -85,7 +86,7 @@ import java.util.Set;
  */
 public class LauncherModel extends BroadcastReceiver
         implements LauncherAppsCompat.OnAppsChangedCallbackCompat {
-    static final boolean DEBUG_LOADERS = false;
+    static final boolean DEBUG_LOADERS = true;
     private static final boolean DEBUG_RECEIVER = false;
     private static final boolean REMOVE_UNRESTORED_ICONS = true;
 
@@ -1535,6 +1536,29 @@ public class LauncherModel extends BroadcastReceiver
             onlyBindAllApps();
         }
 
+        //edit by zjj
+        private void verifyApplications() {
+            final Context context = mApp.getContext();
+
+            // Cross reference all the applications in our apps list with items in the workspace
+            ArrayList<ItemInfo> tmpInfos;
+            ArrayList<ItemInfo> added = new ArrayList<ItemInfo>();
+            synchronized (sBgLock) {
+                for (AppInfo app : mBgAllAppsList.data) {
+                    tmpInfos = getItemInfoForComponentName(app.componentName, app.user);
+                    if (tmpInfos.isEmpty()) {
+                        // We are missing an application icon, so add this to the workspace
+                        added.add(app);
+                        // This is a rare event, so lets log it
+                        Log.e(TAG, "Missing Application on load: " + app);
+                    }
+                }
+            }
+            if (!added.isEmpty()) {
+                addAndBindAddedWorkspaceItems(context, added);//7.0 虽然去掉了去抽屉的代码，但留了这个方法给我们。
+            }
+        }
+
         public void run() {
             synchronized (mLock) {
                 if (mStopped) {
@@ -1546,8 +1570,21 @@ public class LauncherModel extends BroadcastReceiver
             // All Apps interface in the foreground, load All Apps first. Otherwise, load the
             // workspace first (default).
             keep_running: {
-                if (DEBUG_LOADERS) Log.d(TAG, "step 1: loading workspace");
+
+                // second step
+                if (DEBUG_LOADERS) KLog.d("step 2: loading all apps");
+                loadAndBindAllApps();
+
+
+                if (DEBUG_LOADERS) KLog.d("step 1: loading workspace");
                 loadAndBindWorkspace();
+
+
+                //添加 @{ edit by zjj
+                if (LauncherAppState.isDisableAllApps()) {
+                    verifyApplications();
+                }
+                //添加 }@
 
                 if (mStopped) {
                     break keep_running;
@@ -1555,9 +1592,7 @@ public class LauncherModel extends BroadcastReceiver
 
                 waitForIdle();
 
-                // second step
-                if (DEBUG_LOADERS) Log.d(TAG, "step 2: loading all apps");
-                loadAndBindAllApps();
+
             }
 
             // Clear out this reference, otherwise we end up holding it until all of the
@@ -1737,7 +1772,7 @@ public class LauncherModel extends BroadcastReceiver
 
             if (MigrateFromRestoreTask.ENABLED && MigrateFromRestoreTask.shouldRunTask(mContext)) {
                 long migrationStartTime = System.currentTimeMillis();
-                Log.v(TAG, "Starting workspace migration after restore");
+                KLog.v("Starting workspace migration after restore");
                 try {
                     MigrateFromRestoreTask task = new MigrateFromRestoreTask(mContext);
                     // Clear the flags before starting the task, so that we do not run the task
@@ -1745,12 +1780,12 @@ public class LauncherModel extends BroadcastReceiver
                     MigrateFromRestoreTask.clearFlags(mContext);
                     task.execute();
                 } catch (Exception e) {
-                    Log.e(TAG, "Error during grid migration", e);
+                    KLog.e("Error during grid migration", e);
 
                     // Clear workspace.
                     mFlags = mFlags | LOADER_FLAG_CLEAR_WORKSPACE;
                 }
-                Log.v(TAG, "Workspace migration completed in "
+                KLog.v("Workspace migration completed in "
                         + (System.currentTimeMillis() - migrationStartTime));
             }
 
@@ -1761,10 +1796,12 @@ public class LauncherModel extends BroadcastReceiver
 
             if ((mFlags & LOADER_FLAG_MIGRATE_SHORTCUTS) != 0) {
                 // append the user's Launcher2 shortcuts
+                KLog.d("loadWorkspace: migrating from launcher2");
                 Launcher.addDumpLog(TAG, "loadWorkspace: migrating from launcher2", true);
                 LauncherAppState.getLauncherProvider().migrateLauncher2Shortcuts();
             } else {
                 // Make sure the default workspace is loaded
+                KLog.d("loadWorkspace: loading default favorites");
                 Launcher.addDumpLog(TAG, "loadWorkspace: loading default favorites", false);
                 // 调用loadDefaultFavoritesIfNecessary这个方法，来解析配置默认的桌面图标的xml文件
                 LauncherAppState.getLauncherProvider().loadDefaultFavoritesIfNecessary();
@@ -1780,7 +1817,7 @@ public class LauncherModel extends BroadcastReceiver
                 final ArrayList<Long> itemsToRemove = new ArrayList<Long>();
                 final ArrayList<Long> restoredRows = new ArrayList<Long>();
                 final Uri contentUri = LauncherSettings.Favorites.CONTENT_URI;
-                if (DEBUG_LOADERS) Log.d(TAG, "loading model from " + contentUri);
+                if (DEBUG_LOADERS) KLog.d("loading model from " + contentUri);
                 final Cursor c = contentResolver.query(contentUri, null, null, null, null);
 
                 // +1 for the hotseat (it can be larger than the workspace)
@@ -2185,7 +2222,7 @@ public class LauncherModel extends BroadcastReceiver
                                         }
                                         appWidgetInfo.restoreStatus = status;
                                     } else {
-                                        Log.v(TAG, "Widget restore pending id=" + id
+                                        KLog.v("Widget restore pending id=" + id
                                                 + " appWidgetId=" + appWidgetId
                                                 + " status =" + restoreStatus);
                                         appWidgetInfo = new LauncherAppWidgetInfo(appWidgetId,
@@ -2220,7 +2257,7 @@ public class LauncherModel extends BroadcastReceiver
 
                                     if (container != LauncherSettings.Favorites.CONTAINER_DESKTOP &&
                                         container != LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
-                                        Log.e(TAG, "Widget found where container != " +
+                                        KLog.e("Widget found where container != " +
                                                 "CONTAINER_DESKTOP nor CONTAINER_HOTSEAT - ignoring!");
                                         itemsToRemove.add(id);
                                         continue;
@@ -2334,8 +2371,8 @@ public class LauncherModel extends BroadcastReceiver
                 }
 
                 if (DEBUG_LOADERS) {
-                    Log.d(TAG, "loaded workspace in " + (SystemClock.uptimeMillis()-t) + "ms");
-                    Log.d(TAG, "workspace layout: ");
+                    KLog.d("loaded workspace in " + (SystemClock.uptimeMillis()-t) + "ms");
+                    KLog.d("workspace layout: ");
                     int nScreens = occupied.size();
                     for (int y = 0; y < countY; y++) {
                         String line = "";
@@ -2354,7 +2391,7 @@ public class LauncherModel extends BroadcastReceiver
                                 }
                             }
                         }
-                        Log.d(TAG, "[ " + line + " ]");
+                        KLog.d("[ " + line + " ]");
                     }
                 }
             }
@@ -2569,7 +2606,7 @@ public class LauncherModel extends BroadcastReceiver
          * Binds all loaded data to actual views on the main thread.
          */
         private void bindWorkspace(int synchronizeBindPage) {
-            Log.d("yunovo_launcher","LauncherModel -> bindWorkspace : "+synchronizeBindPage);
+            KLog.d(synchronizeBindPage);
             final long t = SystemClock.uptimeMillis();
             Runnable r;
 
@@ -2578,7 +2615,7 @@ public class LauncherModel extends BroadcastReceiver
             final Callbacks oldCallbacks = mCallbacks.get();
             if (oldCallbacks == null) {
                 // This launcher has exited and nobody bothered to tell us.  Just bail.
-                Log.w(TAG, "LoaderTask running with no launcher");
+                KLog.w("LoaderTask running with no launcher");
                 return;
             }
 
@@ -2599,9 +2636,7 @@ public class LauncherModel extends BroadcastReceiver
                 folders = sBgFolders.clone();
                 itemsIdMap = sBgItemsIdMap.clone();
 
-                Log.d("yunovo_launcher","LauncherModel -> bindWorkspace : "+workspaceItems.toString());
-                Log.d("yunovo_launcher","LauncherModel -> bindWorkspace : "+appWidgets.toString());
-                Log.d("yunovo_launcher","LauncherModel -> bindWorkspace : "+orderedScreenIds.toString());
+                KLog.d("workspaceItems: "+workspaceItems.toString());
             }
 
             final boolean isLoadingSynchronously =
@@ -2719,7 +2754,7 @@ public class LauncherModel extends BroadcastReceiver
 
         private void loadAndBindAllApps() {
             if (DEBUG_LOADERS) {
-                Log.d(TAG, "loadAndBindAllApps mAllAppsLoaded=" + mAllAppsLoaded);
+                KLog.d("loadAndBindAllApps mAllAppsLoaded=" + mAllAppsLoaded);
             }
             if (!mAllAppsLoaded) {
                 loadAllApps();
@@ -2801,24 +2836,29 @@ public class LauncherModel extends BroadcastReceiver
 
             final Callbacks oldCallbacks = mCallbacks.get();
             if (oldCallbacks == null) {
-                // This launcher has exited and nobody bothered to tell us.  Just bail.
-                Log.w(TAG, "LoaderTask running with no launcher (loadAllApps)");
+                KLog.d("LoaderTask 运行中如果Launcher退出则返回");
                 return;
             }
+
 
             final List<UserHandleCompat> profiles = mUserManager.getUserProfiles();
 
             // Clear the list of apps
             mBgAllAppsList.clear();
+
+            //加载每个用户的apps
             for (UserHandleCompat user : profiles) {
                 // Query for the set of apps
                 final long qiaTime = DEBUG_LOADERS ? SystemClock.uptimeMillis() : 0;
+                // 在LauncherAppsCompatV16(4.1) 或 LauncherAppsCompatVL(5.0) 中通过不同方式获取所有app列表
                 final List<LauncherActivityInfoCompat> apps = mLauncherApps.getActivityList(null, user);
+
                 if (DEBUG_LOADERS) {
-                    Log.d(TAG, "getActivityList took "
+                    KLog.d("getActivityList took "
                             + (SystemClock.uptimeMillis()-qiaTime) + "ms for user " + user);
-                    Log.d(TAG, "getActivityList got " + apps.size() + " apps for user " + user);
+                    KLog.d("getActivityList got " + apps.size() + " apps for user " + user);
                 }
+
                 // Fail if we don't have any apps
                 // TODO: Fix this. Only fail for the current user.
                 if (apps == null || apps.isEmpty()) {
@@ -2871,11 +2911,11 @@ public class LauncherModel extends BroadcastReceiver
                     if (callbacks != null) {
                         callbacks.bindAllApplications(added);
                         if (DEBUG_LOADERS) {
-                            Log.d(TAG, "bound " + added.size() + " apps in "
+                            KLog.d("bound " + added.size() + " apps in "
                                 + (SystemClock.uptimeMillis() - bindTime) + "ms");
                         }
                     } else {
-                        Log.i(TAG, "not binding apps: no Launcher activity");
+                        KLog.i("not binding apps: no Launcher activity");
                     }
                 }
             });
@@ -2885,7 +2925,7 @@ public class LauncherModel extends BroadcastReceiver
             //绑定小部件和快捷方式到小部件界面
             loadAndBindWidgetsAndShortcuts(tryGetCallbacks(oldCallbacks), true /* refresh */);
             if (DEBUG_LOADERS) {
-                Log.d(TAG, "Icons processed in "
+                KLog.d("Icons processed in "
                         + (SystemClock.uptimeMillis() - loadTime) + "ms");
             }
         }
@@ -3096,7 +3136,16 @@ public class LauncherModel extends BroadcastReceiver
                     new HashMap<ComponentName, AppInfo>();
 
             if (added != null) {
-                addAppsToAllApps(context, added);
+                //edit by zjj
+                if(LauncherAppState.isDisableAllApps()){
+                    final ArrayList<ItemInfo> addedInfos = new ArrayList<ItemInfo>(added);
+                    addAndBindAddedWorkspaceItems(context, addedInfos);
+                }else{
+                    // 添加 }@
+                    addAppsToAllApps(context, added);
+                }
+
+
                 for (AppInfo ai : added) {
                     addedOrUpdatedApps.put(ai.componentName, ai);
                 }

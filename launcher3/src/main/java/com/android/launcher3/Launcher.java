@@ -112,6 +112,7 @@ import com.android.launcher3.util.Thunk;
 import com.android.launcher3.widget.PendingAddWidgetInfo;
 import com.android.launcher3.widget.WidgetHostViewLoader;
 import com.android.launcher3.widget.WidgetsContainerView;
+import com.socks.library.KLog;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -425,6 +426,8 @@ public class Launcher extends Activity
                     .penaltyDeath()
                     .build());
         }
+        //初始化Log工具
+        KLog.init(BuildConfig.LOG_DEBUG);
 
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.preOnCreate();
@@ -496,7 +499,7 @@ public class Launcher extends Activity
             } else {
                 // We only load the page synchronously if the user rotates (or triggers a
                 // configuration change) while launcher is in the foreground
-                Log.d("yunovo_launcher","Launcher -> startLoader : "+mWorkspace.getRestorePage());
+                KLog.d("Launcher -> startLoader : "+mWorkspace.getRestorePage());
                 mModel.startLoader(mWorkspace.getRestorePage());
             }
         }
@@ -3734,7 +3737,7 @@ public class Launcher extends Activity
         // Create the custom content page (this call updates mDefaultScreen which calls
         // setCurrentPage() so ensure that all pages are added before calling this).
         if (hasCustomContentToLeft()) {
-            Log.d("yunovo_launcher","Launcher-> hasCustomContentToLeft : ");
+            KLog.d("Launcher-> hasCustomContentToLeft : ");
             mWorkspace.createCustomContentContainer();
             populateCustomContentContainer();
         }
@@ -3743,7 +3746,7 @@ public class Launcher extends Activity
     @Override
     public void bindAddScreens(ArrayList<Long> orderedScreenIds) {
         int count = orderedScreenIds.size();
-        Log.d("yunovo_launcher","Launcher-> bindAddScreens count: "+count);
+        KLog.d("Launcher-> bindAddScreens count: "+count);
         for (int i = 0; i < count; i++) {
             mWorkspace.insertNewWorkspaceScreenBeforeEmptyScreen(orderedScreenIds.get(i));
         }
@@ -3817,6 +3820,9 @@ public class Launcher extends Activity
      */
     public void bindItems(final ArrayList<ItemInfo> shortcuts, final int start, final int end,
                           final boolean forceAnimateIcons) {
+
+        KLog.d(shortcuts.toString(),"start: "+start,"end: "+end);
+
         Runnable r = new Runnable() {
             public void run() {
                 bindItems(shortcuts, start, end, forceAnimateIcons);
@@ -3834,6 +3840,7 @@ public class Launcher extends Activity
         long newShortcutsScreenId = -1;
         for (int i = start; i < end; i++) {
             final ItemInfo item = shortcuts.get(i);
+
 
             // Short circuit if we are loading dock items for a configuration which has no dock
             if (item.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT &&

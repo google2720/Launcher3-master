@@ -180,4 +180,9 @@ public class LauncherAppState {
         return getInstance().mBuildInfo.isDogfoodBuild();
     }
 
+    public static boolean isDisableAllApps() {
+        // Returns false on non-dogfood builds.
+        return true;
+    }
+
 }
