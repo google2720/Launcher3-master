@@ -20,7 +20,12 @@ android {
         debug {
             buildConfigField "boolean", "LOG_DEBUG", "true"
         }
+    }
 
+    signingConfigs {
+        debug {
+            storeFile file('../keystore/mtk6735/debug.keystore')
+        }
     }
 }
 

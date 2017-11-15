@@ -410,6 +410,9 @@ public class Launcher extends Activity
         super.onCreate(savedInstanceState, persistentState);
     }
 
+    //add by steven zhang 20170105
+    static final String PAGEVIEWANIMATION_TYPE = "launcher.pageview_animation_type";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (DEBUG_STRICT_MODE) {
@@ -476,6 +479,13 @@ public class Launcher extends Activity
 
         //加载布局
         setContentView(R.layout.launcher);
+
+        //add by steven zhang 20170105
+        //在activity启动的时候获取默认切换动画并设置
+        int type = mSharedPrefs.getInt(PAGEVIEWANIMATION_TYPE, 0);
+        PageViewAnimation.getInstance().setPageViewAnime(type);
+
+
         //初始化桌面各个控件
         setupViews();
         //设置各个控件的位置
@@ -539,6 +549,8 @@ public class Launcher extends Activity
             showFirstRunActivity();
             showFirstRunClings();
         }
+
+
     }
 
     @Override
@@ -1488,6 +1500,65 @@ public class Launcher extends Activity
 
             boolean show = shouldShowWeightWatcher();
             mWeightWatcher.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+
+        //add by steven zhang 20170105
+        final ViewGroup pageAnimViewGroup = (ViewGroup) findViewById(R.id.id_pageainm_layout);
+        final int count = pageAnimViewGroup.getChildCount();
+        for (int i = 0; i < count; i++) {
+            TextView child = (TextView) pageAnimViewGroup.getChildAt(i);
+            //设置当前切换动画按钮哪个为选中状态
+            setAnimPageFocusDot(PageViewAnimation.getInstance().getPageViewAnime(), i, child);
+            child.setId(i);
+            child.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    int id = v.getId();
+                    //设置切换动画类型
+                    PageViewAnimation.getInstance().setPageViewAnime(id);
+                    //保存切换动画类型到文件
+                    setPageViewAnimaType(id);
+                    //重置焦点
+                    for (int j = 0; j < count; j++) {
+                        TextView child = (TextView) pageAnimViewGroup.getChildAt(j);
+                        setAnimPageFocusDot(id, j, child);
+                    }
+                }
+            });
+
+            child.setOnTouchListener(getHapticFeedbackTouchListener());
+        }
+
+
+        mOverviewPanel.setAlpha(0f);
+    }
+
+    /**
+     * add by steven zhang 20170105
+     * 设置页面切换动画
+     */
+    private void setPageViewAnimaType(int type) {
+        SharedPreferences.Editor editor = mSharedPrefs.edit();
+        editor.putInt(PAGEVIEWANIMATION_TYPE, type);
+        editor.apply();
+    }
+
+    /**
+     * add by steven zhang 20170105
+     * 设置切换动画焦点
+     * @param selected
+     * @param index
+     * @param child
+     */
+    private void setAnimPageFocusDot(int selected, int index, TextView child) {
+        Drawable drawable = getResources().getDrawable(R.drawable.focus_dot);
+        Drawable[] drawables = child.getCompoundDrawables();
+        child.setCompoundDrawables(null, drawables[1], null, null);
+
+        if (selected == index) {
+            drawable.setBounds(0, 0, 10, 10);
+            child.setCompoundDrawables(null, drawables[1], null, drawable);
         }
     }
 
@@ -3125,7 +3196,7 @@ public class Launcher extends Activity
      * is animated relative to the specified View. If the View is null, no animation
      * is played.
      *
-     * @param folderInfo The FolderInfo describing the folder to open.
+     * @param folderIcon The FolderInfo describing the folder to open.
      */
     public void openFolder(FolderIcon folderIcon) {
         Folder folder = folderIcon.getFolder();
@@ -4065,7 +4136,7 @@ public class Launcher extends Activity
      * Restores a pending widget.
      *
      * @param appWidgetId The app widget id
-     * @param cellInfo The position on screen where to create the widget.
+     *
      */
     private void completeRestoreAppWidget(final int appWidgetId) {
         LauncherAppWidgetHostView view = mWorkspace.getWidgetForAppWidgetId(appWidgetId);
